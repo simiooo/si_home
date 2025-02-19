@@ -10,6 +10,7 @@ import { ExportOutlined, ImportOutlined } from "@ant-design/icons";
 import Tooltip from "./components/Tooltip";
 import { z } from "zod";
 import { useAppState } from "./store";
+import Empty from "./components/Empty";
 
 export const CardSchema = z.object({
   title: z.string().nonempty("Title is required"),
@@ -145,7 +146,7 @@ export default function App() {
               }}
             ></Group>
           )}
-          {(groups ?? []).map((group) => (
+          {(groups?.length > 0 || adding) ? (groups ?? []).map((group) => (
             <Group
               onDelete={(id) => {
                 if (!id) return false;
@@ -177,7 +178,12 @@ export default function App() {
               key={group.id}
               {...group}
             />
-          ))}
+          )) : <Empty 
+          title="No Collection Here" text={<Button 
+          onClick={() => {
+            setAdding(true)
+          }}
+          >Create A Collection</Button>} />}
         </div>
         {(tabs ?? []).length > 0 ? (
           <div>

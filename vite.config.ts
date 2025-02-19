@@ -8,15 +8,16 @@ export default defineConfig({
   base: "/home/",
   build: { outDir: "dist/home" },
   plugins: [
-    react(),
-    tailwindcss(),
     viteStaticCopy({
       targets: [
         {
           src: "extension/**/*",
-          dest: ".",
+          dest: "../",
         },
       ],
     }),
+    react(),
+    tailwindcss(),
+    
   ],
 });
