@@ -16,9 +16,7 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "description": {
-    ""
-  },
+  "description": "A Simple tool for manage your tabs",
   "author": {
     "email": "simooowann@gmail.com"
   },
