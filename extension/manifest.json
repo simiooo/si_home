@@ -1,28 +1,26 @@
 {
   "manifest_version": 3,
   "name": "Si Home",
-  "version": "1.0",
+  "version": "0.0.1",
   "icons": {
-  
+    "48": "home/android-chrome-48x48.png",
+    "72": "home/android-chrome-72x72.png",
+    "96": "home/android-chrome-96x96.png",
+    "144": "home/android-chrome-144x144.png",
+    "512": "home/android-chrome-512x512.png"
   },
   "chrome_url_overrides": {
     "newtab": "home/index.html"
   },
-  "permissions": [
-    "tabs",
-    "storage",
-    "topSites",
-    "favicon"
-  ],
+  "permissions": ["tabs", "storage", "topSites", "favicon"],
   "action": {
     "default_popup": "popup.html"
   },
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ],
-  "background": {
-    "service_worker": "service-worker.js",
-    "type": "module"
-  }
+  "description": {
+    ""
+  },
+  "author": {
+    "email": "simooowann@gmail.com"
+  },
+  "host_permissions": ["http://*/*", "https://*/*"]
 }
