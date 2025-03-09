@@ -24,7 +24,7 @@ export interface CardProps {
   description?: string;
 }
 
-export function getSourceDom<T> (e?: React.MouseEvent<T>, className?: string) {
+export function getSourceDom<T>(e?: React.MouseEvent<T>, className?: string) {
   let sourceDom = e?.target as unknown as HTMLElement | null;
   while (
     sourceDom &&
@@ -113,7 +113,7 @@ export function Card({
           if (!sourceDom) {
             return;
           }
-          
+
           const draggable = sourceDom?.getBoundingClientRect();
           const dropable = self.current?.getBoundingClientRect();
           if (!dropable) return;
@@ -128,19 +128,41 @@ export function Card({
           if (target.id !== source.id && res.ratio > 0.6) {
             const isNew = sourceDom.dataset["isnew"];
             if (isNew === "1") {
-              onDroppedByNewTab?.(
-                {
-                  title: sourceDom.dataset["title"] ?? "",
-                  id: "",
-                  order: 0,
-                  href: sourceDom.dataset["url"] ?? "",
-                  favIconUrl:
-                    sourceDom.dataset["favIconUrl".toLocaleLowerCase()] ?? "",
+              const source = {
+                title: sourceDom.dataset["title"] ?? "",
+                id: "",
+                order: 0,
+                href: sourceDom.dataset["url"] ?? "",
+                favIconUrl:
+                  sourceDom.dataset["favIconUrl".toLocaleLowerCase()] ?? "",
+              }
+              const cardDropEvent = new CustomEvent('cardDropByNewTab', {
+                detail: {
+                  source,
+                  target
                 },
+                bubbles: true,
+                cancelable: true
+              });
+              self.current?.dispatchEvent(cardDropEvent);
+              onDroppedByNewTab?.(
+                source,
                 target
               );
               return;
             }
+            // 创建自定义事件
+            const cardDropEvent = new CustomEvent('cardDrop', {
+              detail: {
+                source,
+                target
+              },
+              bubbles: true,
+              cancelable: true
+            });
+
+            // 触发自定义事件
+            self.current?.dispatchEvent(cardDropEvent);
             onDropped?.(source, target);
           }
         }}
@@ -177,9 +199,8 @@ export function Card({
             href={href}
             target="_blank"
             className={` block group/card  p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:scale-[1.02] focus:ring-2 
-      focus:ring-cyan-500 focus:ring-offset-2 active:scale-95 active:bg-gray-50 ${
-        dragging ? "transition-none" : "transition-all duration-200"
-      }  cursor-pointer hover:opacity-100 group`}
+      focus:ring-cyan-500 focus:ring-offset-2 active:scale-95 active:bg-gray-50 ${dragging ? "transition-none" : "transition-all duration-200"
+              }  cursor-pointer hover:opacity-100 group`}
           >
             <div className="flex w-full overflow-hidden items-center space-x-3">
               <Avatar src={favIconUrl} />

@@ -57,6 +57,15 @@ export function Group({
 
   return (
     <motion.div
+      {...{
+        onCardDropByNewTab: (e: unknown) => {
+          console.log(e)
+        },
+        onCardDrop: (e: unknown) => {
+          console.log(e);
+
+        }
+      }}
       drag
       dragSnapToOrigin
       whileDrag={{
@@ -148,7 +157,7 @@ export function Group({
               e as unknown as React.MouseEvent<HTMLElement> | undefined,
               'page_card_container'
             );
-            
+
             if (!sourceDom) {
               return;
             }
