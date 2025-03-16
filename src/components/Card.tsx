@@ -1,7 +1,6 @@
 import Avatar from "./Avatar";
 import Tooltip from "./Tooltip";
-import { motion, useAnimation } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "./Button";
 import Modal from "./Modal";
 import EditCardModal from "./EditCardModal";
@@ -10,12 +9,6 @@ import {
   EditOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
-import {
-  DragContextListener,
-  DragContextTrigger,
-  DragStateChangeTrigger,
-} from "./DragAndDrop/DragContextProvider";
-import { PageTabCard } from "../App";
 export interface CardProps {
   id: string;
   title: string;
@@ -63,18 +56,14 @@ export function Card({
   description,
   href,
   id,
-  onDropped,
-  onDroppedByNewTab,
   onRemove,
-  onCardEdit,
+  onEdit,
 }: CardProps & {
-  onRemove: (id?: string) => void;
-  onDropped?: (source: { id?: string }, target: { id?: string }) => void;
-  onDroppedByNewTab?: (source: PageTabCard, target: { id?: string }) => void;
-  onCardEdit?: (payload: Omit<CardProps, "favIconUrl">) => void;
+  onRemove: () => void;
+  onEdit: (payload: Omit<CardProps, "favIconUrl">) => void;
 }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleEditClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -82,126 +71,26 @@ export function Card({
     e.preventDefault();
     setIsEditModalOpen(true);
   };
-  const controls = useAnimation();
 
-  const handleCloseClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsCloseModalOpen(true);
-  };
+
 
   const handleEditModalClose = () => {
     setIsEditModalOpen(false);
   };
 
-  const handleCloseModalClose = () => {
-    setIsCloseModalOpen(false);
-  };
-  const [dragging, setDragging] = useState(false);
-
-  const ref = useRef<{ trigger: DragStateChangeTrigger<HTMLElement> }>(null);
-  const self = useRef<HTMLDivElement>(null);
+  
   const renderIniitData = useMemo(() => {
     return { title, favIconUrl, href, description };
   }, [title, favIconUrl, href, description]);
 
   return (
-    <DragContextTrigger ref={ref}>
-      <DragContextListener
-        onDragStateChange={(e: React.MouseEvent<HTMLElement>) => {
-          const sourceDom = getSourceDom(e as unknown as React.MouseEvent<HTMLElement> | undefined)
-          if (!sourceDom) {
-            return;
-          }
-
-          const draggable = sourceDom?.getBoundingClientRect();
-          const dropable = self.current?.getBoundingClientRect();
-          if (!dropable) return;
-          const res = isInBox(dropable, draggable);
-          if (!res.isOverlap) return;
-          const source = {
-            id: sourceDom?.dataset["id"],
-          };
-          const target = {
-            id: self.current?.dataset["id"],
-          };
-          if (target.id !== source.id && res.ratio > 0.6) {
-            const isNew = sourceDom.dataset["isnew"];
-            if (isNew === "1") {
-              const source = {
-                title: sourceDom.dataset["title"] ?? "",
-                id: "",
-                order: 0,
-                href: sourceDom.dataset["url"] ?? "",
-                favIconUrl:
-                  sourceDom.dataset["favIconUrl".toLocaleLowerCase()] ?? "",
-              }
-              const cardDropEvent = new CustomEvent('cardDropByNewTab', {
-                detail: {
-                  source,
-                  target
-                },
-                bubbles: true,
-                cancelable: true
-              });
-              self.current?.dispatchEvent(cardDropEvent);
-              onDroppedByNewTab?.(
-                source,
-                target
-              );
-              return;
-            }
-            // 创建自定义事件
-            const cardDropEvent = new CustomEvent('cardDrop', {
-              detail: {
-                source,
-                target
-              },
-              bubbles: true,
-              cancelable: true
-            });
-
-            // 触发自定义事件
-            self.current?.dispatchEvent(cardDropEvent);
-            onDropped?.(source, target);
-          }
-        }}
-      >
-        <motion.div
+    
+        <div
           data-id={id}
           data-url={href}
-          className="page_card_container relative"
-          ref={self}
-          whileDrag={{ zIndex: 1 }}
-          animate={controls}
-          drag
-          dragMomentum={false}
-          onClick={(e) => {
-            if (dragging) {
-              e.preventDefault();
-              e.stopPropagation();
-              return;
-            }
-          }}
-          onDragStart={() => {
-            setDragging(true);
-          }}
-          onDragEnd={async (e) => {
-            ref?.current?.trigger(
-              e as unknown as React.MouseEvent<HTMLElement>
-            );
-            setDragging(false);
-            controls.set({ opacity: 1, x: 0, y: 0 });
-          }}
+          className="page_card_container transition-all relative block group/card  p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:scale-[1.02] focus:ring-2 
+      focus:ring-cyan-500 focus:ring-offset-2 active:scale-95 active:bg-gray-50  cursor-pointer hover:opacity-100 group active:shadow-2xl active:z-1"
         >
-          <motion.a
-            draggable={false}
-            href={href}
-            target="_blank"
-            className={` block group/card  p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:scale-[1.02] focus:ring-2 
-      focus:ring-cyan-500 focus:ring-offset-2 active:scale-95 active:bg-gray-50 ${dragging ? "transition-none" : "transition-all duration-200"
-              }  cursor-pointer hover:opacity-100 group`}
-          >
             <div className="flex w-full overflow-hidden items-center space-x-3">
               <Avatar src={favIconUrl} />
               <div className="w-[calc(100%-3.5rem)]">
@@ -222,7 +111,9 @@ export function Card({
             </div>
             <div className="absolute -top-2 -right-2 opacity-0 group-hover/card:opacity-100 transition-opacity">
               <button
-                onClick={handleCloseClick}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemove?.()}}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-1.5 rounded-full text-xs"
               >
                 <CloseOutlined />
@@ -261,40 +152,25 @@ export function Card({
               title="Card Edit"
               onClose={handleEditModalClose}
               initialCardData={renderIniitData}
-              onSubmit={(e) => {
-                onCardEdit?.(e);
+              onSubmit={(payload) => {
+                onEdit({...(payload ?? {}),id: id})
                 handleEditModalClose();
               }}
             ></EditCardModal>
-            <Modal
-              title="Delete Card"
-              isOpen={isCloseModalOpen}
-              onClose={handleCloseModalClose}
-              footer={
-                <div>
-                  <Button
-                    onClick={() => {
-                      onRemove?.(id);
-                      handleCloseModalClose();
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              }
-            >
-              <div>Sure To Delete?</div>
-            </Modal>
+            
             <Modal
               title="Share Card"
               isOpen={isShareModalOpen}
               onClose={() => setIsShareModalOpen(false)}
             >
-              <div>Share Modal Content</div>
+              <div
+              className="flex flex-col gap-0.5"
+              >
+                <div className="text-3xl">{title}</div>
+                <div className="text-md">{description}</div>
+                {href ? <a className="text-md">{href}</a> : "No Link"}
+              </div>
             </Modal>
-          </motion.a>
-        </motion.div>
-      </DragContextListener>
-    </DragContextTrigger>
+        </div>
   );
 }

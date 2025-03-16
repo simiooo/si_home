@@ -1,3 +1,4 @@
+import cryptoRandomString from "crypto-random-string";
 import React, { HTMLAttributes } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
@@ -33,7 +34,7 @@ Message.show = (message: string, options?: {duration?: number, danger?: boolean}
   
   let timer: number | undefined
   const component = document.createElement("div");
-  const rd = "message" + crypto.randomUUID()
+  const rd = "message" + cryptoRandomString({length: 10})
   component.id = rd;
   component.className = 'message-portal';
   const root = createRoot(component)

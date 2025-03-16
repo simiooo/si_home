@@ -12,7 +12,7 @@
   "chrome_url_overrides": {
     "newtab": "home/index.html"
   },
-  "permissions": ["tabs", "storage", "topSites", "favicon"],
+  "permissions": ["tabs", "storage", "favicon"],
   "action": {
     "default_popup": "popup.html"
   },

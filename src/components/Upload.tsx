@@ -1,8 +1,9 @@
 import { ReactElement, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { ConfigSchema } from "../App";
+import { ConfigSchema, Groups } from "../App";
 import Message from "./Message";
 import { useAppState } from "../store";
+import { ConfigStorage } from "../utils/storage";
 
 type ConfigPayload = {
   configFile?: FileList;
@@ -21,11 +22,11 @@ const Upload = ({ content }: UploadProps) => {
     fd.readAsText(payload.configFile?.[0], "utf-8");
     fd.onloadend = (e) => {
       try {
-        if (!chrome.storage) throw Error('Not In Chrome Extension.');
         const data = (e.target?.result ?? "[]") as string;
-        const tabData = JSON.parse(data);
+        const tabData = JSON.parse(data) as Groups[];
         ConfigSchema.parse(tabData);
-        chrome.storage.local.set({ tabData: tabData });
+        
+        ConfigStorage.save({ tabData: tabData });
         refresh()
         Message.show("Success")
         setValue("configFile",undefined)
