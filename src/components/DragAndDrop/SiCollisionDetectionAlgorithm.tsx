@@ -15,6 +15,7 @@ export function siCollisionDetectionAlgorithm({
   droppableContainers: DroppableContainer[];
   pointerCoordinates: Coordinates | null;
 }): Collision[] {
+    console.log(droppableContainers, args)
   return closestCorners({
     ...args,
     droppableContainers: droppableContainers.filter(({ id }) => id !== args?.active?.id),

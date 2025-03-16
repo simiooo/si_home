@@ -136,6 +136,8 @@ export default function App() {
           cardAdd(target.group, {
             title: data.title,
             favIconUrl: data.favIconUrl,
+            href: data.href,
+            description: data.title
           })
           return
         }

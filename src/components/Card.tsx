@@ -82,10 +82,11 @@ export function Card({
   const renderIniitData = useMemo(() => {
     return { title, favIconUrl, href, description };
   }, [title, favIconUrl, href, description]);
-
+  
   return (
-    
-        <div
+        <a
+        target="_blank"
+        href={href}
           data-id={id}
           data-url={href}
           className="page_card_container transition-all relative block group/card  p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:scale-[1.02] focus:ring-2 
@@ -113,6 +114,7 @@ export function Card({
               <button
                 onClick={(e) => {
                   e.stopPropagation()
+                  e.preventDefault()
                   onRemove?.()}}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-1.5 rounded-full text-xs"
               >
@@ -168,9 +170,9 @@ export function Card({
               >
                 <div className="text-3xl">{title}</div>
                 <div className="text-md">{description}</div>
-                {href ? <a className="text-md">{href}</a> : "No Link"}
+                {href ? <a target="_blank" href={href} className="text-md">{href}</a> : "No Link"}
               </div>
             </Modal>
-        </div>
+        </a>
   );
 }
