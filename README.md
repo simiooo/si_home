@@ -1,6 +1,8 @@
 # Si Home
 A Chrome New Tab extension.
-
+## Requirements
+* nodejs >= 19
+* pnpm >= 10
 ## build
 1. Insall Dependency .
 ```
