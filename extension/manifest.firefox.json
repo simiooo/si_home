@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Si Home",
+  "version": "0.0.1",
+  "icons": {
+    "48": "home/android-chrome-48x48.png",
+    "72": "home/android-chrome-72x72.png",
+    "96": "home/android-chrome-96x96.png",
+    "144": "home/android-chrome-144x144.png",
+    "512": "home/android-chrome-512x512.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "home/index.html"
+  },
+  "permissions": ["tabs", "storage", "favicon"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "description": "A Simple tool for manage your tabs",
+  "author": "simooowann",
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "si_home@squirrelso.top",
+      "strict_min_version": "100.0"
+    }
+  }
+}
