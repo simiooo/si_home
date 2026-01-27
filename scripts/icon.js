@@ -1,6 +1,6 @@
 import { favicons } from "favicons";
 import fs from 'fs'
-const source = "public/icon.png"; // Source image(s). `string`, `buffer` or array of `string`
+const source = "public/image.png"; // Source image(s). `string`, `buffer` or array of `string`
 
 const configuration = {
     path: "/", // Path for overriding default icons path. `string`

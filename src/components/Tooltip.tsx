@@ -81,6 +81,7 @@ const Tooltip: React.FC<TooltipProps> = ({ title, description, children, classNa
             onMouseEnter={openHandler}
             onMouseLeave={closeHandler}
             animate={{ opacity: 1, scaleY: 1 }}
+            onClick={(e) => e.stopPropagation()}
             style={{
 
               top: (rect?.top ?? -999) + window.scrollY + (rect?.height ?? 0),

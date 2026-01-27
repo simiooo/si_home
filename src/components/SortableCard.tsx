@@ -20,10 +20,10 @@ export function SortableCard({ id, onRemove, onEdit, ...props }: SortableCardPro
   const style = {
     transform: CSS.Transform.toString(transform),
     transition: isDragging ? "none" : (transform ? "transform 200ms cubic-bezier(0.2, 0, 0, 1)" : undefined),
-    opacity: isDragging ? 0.9 : 1,
+    opacity: isDragging ? 0 : 1,
     cursor: isDragging ? "grabbing" : "grab",
     zIndex: isDragging ? 50 : 1,
-    transformOrigin: "center center",
+    transformOrigin: "0 0",
   };
 
   return (

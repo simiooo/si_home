@@ -99,7 +99,7 @@ export function Card({
         >
             <div className="flex w-full overflow-hidden items-center space-x-3">
               <Avatar src={favIconUrl} />
-              <div className="w-[calc(100%-3.5rem)]">
+              <div className="w-[calc(100%-3.5rem)]" onClick={(e) => e.stopPropagation()}>
                 <Tooltip
                   className="w-full"
                   title={title}
@@ -126,33 +126,33 @@ export function Card({
                 <CloseOutlined />
               </button>
             </div>
-            <div className="relative button-container">
-              <div className="absolute top-1 w-full opacity-0 group-hover/card:opacity-100 flex space-x-2">
-                <div className="grow"></div>
-                <Tooltip title="Edit Card">
-                  <Button
-                    size="sm"
-                    onClick={handleEditClick}
-                    buttonType="primary"
-                  >
-                    <EditOutlined />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Share Card">
-                  <Button
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setIsShareModalOpen(true);
-                    }}
-                    buttonType="outline"
-                  >
-                    <ShareAltOutlined />
-                  </Button>
-                </Tooltip>
-              </div>
-            </div>
+             <div className="relative button-container" onClick={(e) => e.stopPropagation()}>
+               <div className="absolute top-1 w-full opacity-0 group-hover/card:opacity-100 flex space-x-2">
+                 <div className="grow"></div>
+                 <Tooltip title="Edit Card">
+                   <Button
+                     size="sm"
+                     onClick={handleEditClick}
+                     buttonType="primary"
+                   >
+                     <EditOutlined />
+                   </Button>
+                 </Tooltip>
+                 <Tooltip title="Share Card">
+                   <Button
+                     size="sm"
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       e.preventDefault();
+                       setIsShareModalOpen(true);
+                     }}
+                     buttonType="outline"
+                   >
+                     <ShareAltOutlined />
+                   </Button>
+                 </Tooltip>
+               </div>
+             </div>
 
             <EditCardModal
               isOpen={isEditModalOpen}

@@ -11,7 +11,7 @@ import Tooltip from "./components/Tooltip";
 import { z } from "zod";
 import { CardIdentify, useAppState } from "./store";
 import Empty from "./components/Empty";
-import { DndContext, MouseSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
+import { DndContext, DragOverlay, MouseSensor, useSensor, useSensors, rectIntersection } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 export const CardSchema = z.object({
@@ -46,6 +46,8 @@ export default function App() {
   const [adding, setAdding] = useState(false);
   const [tabs, setTabs] = useState<chrome.tabs.Tab[]>([]);
   const [edingKey, setEditingKey] = useState<{ [key: string]: boolean }>({});
+  const [activeDragItem, setActiveDragItem] = useState<{ id: string; groupId: string; title: string; favIconUrl?: string; description?: string } | null>(null);
+  const [activeDragCardId, setActiveDragCardId] = useState<string | null>(null);
   const groups = useAppState((state) =>
     state.groups
   );
@@ -95,9 +97,44 @@ export default function App() {
   return (
     <DndContext
     modifiers={[restrictToWindowEdges]}
-      collisionDetection={closestCenter}
+      collisionDetection={rectIntersection}
       sensors={sensors}
+      onDragStart={(e) => {
+        if (/group:.+;card:.+/.test(e?.active?.id as string)) {
+          const source = Object.fromEntries(
+            (e.active?.id as string | undefined)
+              ?.split(";")
+              ?.map((temple) => temple?.split(":")) ?? []
+          ) as CardIdentify;
+          
+          const targetGroup = groups.find(g => g.id === source.group);
+          const card = targetGroup?.cards?.find(c => c.id === source.card);
+
+          if (card) {
+            setActiveDragCardId(`group:${source.group};card:${source.card}`);
+            setActiveDragItem({
+              id: card.id,
+              groupId: source.group,
+              title: card.title,
+              favIconUrl: card.favIconUrl,
+              description: card.description,
+            });
+          }
+        }
+        if (/Tag:.+/.test(e?.active?.id as string)) {
+          const data = e.active.data.current as unknown as TagAddCard
+          setActiveDragItem({
+            id: data.id,
+            groupId: data.groupId,
+            title: data.title,
+            favIconUrl: data.favIconUrl,
+            description: data.title,
+          });
+        }
+      }}
       onDragEnd={(e) => {
+        setActiveDragItem(null);
+        setActiveDragCardId(null);
         if ((e.collisions ?? [])?.length < 1) {
           return;
         }
@@ -129,8 +166,16 @@ export default function App() {
           return;
         }
         if((e.active.data.current as unknown as TagAddCard)?.type === 'add') {
-          // 未存在卡片添加至分组
           const data = e.active.data.current as unknown as TagAddCard
+          
+          const targetGroup = groups.find(g => g.id === target.group)
+          const urlExists = targetGroup?.cards?.some(card => card.href === data.href)
+          
+          if (urlExists) {
+            Message.show(`"${data.title}" already exists in this collection`, { danger: true })
+            return
+          }
+          
           cardAdd(target.group, {
             title: data.title,
             favIconUrl: data.favIconUrl,
@@ -142,6 +187,29 @@ export default function App() {
         }
       }}
     >
+      <DragOverlay>
+        {activeDragItem ? (
+          <div className="page_card_container p-4 bg-white rounded-lg border border-gray-300 shadow-2xl opacity-90 cursor-grabbing" style={{ zIndex: 9999 }}>
+            <div className="flex w-full overflow-hidden items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                {activeDragItem.favIconUrl ? (
+                  <img src={activeDragItem.favIconUrl} alt="" className="w-full h-full rounded-full" />
+                ) : (
+                  <span className="text-xs text-gray-500">📄</span>
+                )}
+              </div>
+              <div className="w-[calc(100%-3.5rem)]">
+                <h3 className="text-lg text-ellipsis font-medium truncate">
+                  {activeDragItem.title}
+                </h3>
+                <p className="text-sm text-ellipsis text-gray-500 truncate">
+                  {activeDragItem.description || activeDragItem.title}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </DragOverlay>
       <div className="p-8 bg-gray-50 min-h-screen">
         <div className="flex justify-center gap-1">
           <div className="space-y-8 w-full max-w-7xl">
@@ -234,6 +302,7 @@ export default function App() {
                     cardUpdate(groupId, payload.id, payload)
                   }}
                   editting={edingKey[String(group.id)]}
+                  activeDragCardId={activeDragCardId}
                   key={group.id}
                   {...group}
                 />

@@ -17,7 +17,7 @@ export function Draggable<T extends object & {type: "add" | "sort"}>(props: Drag
     transition: isDragging ? "none" : "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
     opacity: isDragging ? 0.9 : 1,
     cursor: isDragging ? "grabbing" : "grab",
-    zIndex: isDragging ? 50 : 1,
+    zIndex: isDragging ? 9999 : 1,
   };
 
   return (

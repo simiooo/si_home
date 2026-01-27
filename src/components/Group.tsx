@@ -30,6 +30,7 @@ interface GroupProps {
   onCardRemove?: (group?: string, card?: string) => void;
   onCardEdit?: (groupId: string, payload: PageTabCard) => void;
   id?: string;
+  activeDragCardId?: string | null;
 }
 const DETAULT_CARD_FIELD = {};
 export function Group({
@@ -43,6 +44,7 @@ export function Group({
   onSave,
   onCardRemove,
   onCardEdit,
+  activeDragCardId,
 }: GroupProps) {
   const [addPageModalOpen, setAddPageModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -129,7 +131,10 @@ export function Group({
 
       {(cards ?? []).length > 0 ? (
         <SortableContext
-          items={(cards ?? []).map(card => `group:${id};card:${card.id}`)}
+          items={[
+            ...(cards ?? []).map(card => `group:${id};card:${card.id}`),
+            ...(activeDragCardId ? [activeDragCardId] : [])
+          ]}
           strategy={rectSortingStrategy}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
