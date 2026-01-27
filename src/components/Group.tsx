@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Button } from "./Button";
-import { Card, CardProps } from "./Card";
+import { CardProps } from "./Card";
 import Input from "./Input";
 import Modal from "./Modal";
 import { useEffect, useRef, useState } from "react";
@@ -9,7 +9,8 @@ import { useForm } from "react-hook-form";
 import { useAppState } from "../store";
 import { PageTabCard } from "../App";
 import { Droppable } from "./DragAndDrop/Droppable";
-import { Draggable } from "./DragAndDrop/Draggable";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { SortableCard } from "./SortableCard";
 export interface GroupFormValue {
   title: string;
   id: string;
@@ -127,48 +128,41 @@ export function Group({
       )}
 
       {(cards ?? []).length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {(cards ?? []).map((card) => {
-            if (!card.groupId) card.groupId = id;
-            return (
-              <Draggable
-                unikeyId={`group:${id};card:${card.id}`}
-                key={card?.id}
-                data={{
-                  id: card.id,
-                  groupId: id,
-                  href: card.href,
-                  type: "sort",
-                }}
-              >
-                <Droppable
-                  isOverClass="transition-all ring-2 ring-cycan rounded-lg"
-                  unikeyId={`group:${id};card:${card.id}`}
-                >
-                  <Card
-                    key={card.title}
-                    {...card}
-                    onRemove={() => {
-                      cardRemoveModalOpen(card.id);
-                    }}
-                    onEdit={(payload: Omit<CardProps, "favIconUrl">) => {
-                      if(!id) return
-                      onCardEdit?.(id, {...payload, order: card.order, favIconUrl: card.favIconUrl})
-                    }}
-                  />
-                </Droppable>
-              </Draggable>
-            );
-          })}
-        </div>
+        <SortableContext
+          items={(cards ?? []).map(card => `group:${id};card:${card.id}`)}
+          strategy={rectSortingStrategy}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {(cards ?? []).map((card) => {
+              if (!card.groupId) card.groupId = id;
+              return (
+                <SortableCard
+                  key={card?.id}
+                  id={`group:${id};card:${card.id}`}
+                  title={card.title}
+                  favIconUrl={card.favIconUrl}
+                  href={card.href}
+                  description={card.description}
+                  onRemove={() => {
+                    cardRemoveModalOpen(card.id);
+                  }}
+                  onEdit={(payload: Omit<CardProps, "favIconUrl">) => {
+                    if(!id) return
+                    onCardEdit?.(id, {...payload, order: card.order, favIconUrl: card.favIconUrl})
+                  }}
+                />
+              );
+            })}
+          </div>
+        </SortableContext>
       ) : (
         <Droppable
-          isOverClass="transition-all ring-2 ring-cycan rounded-lg"
+          isOverClass="transition-all ring-2 ring-cyan-400 bg-cyan-50 rounded-lg"
           unikeyId={`group:${id};card:empty`}
         >
           <div
             ref={emptyRef}
-            className="text-gray-500 py-16 rounded-lg bg-gray-100 text-center w-full"
+            className="text-gray-500 py-16 rounded-lg bg-gray-100 text-center w-full transition-all"
           >
             Empty now. Drag and drop to add.
           </div>

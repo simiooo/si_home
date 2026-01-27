@@ -94,8 +94,8 @@ export function Card({
         }}
           data-id={id}
           data-url={href}
-          className="page_card_container transition-all relative block group/card  p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:scale-[1.02] focus:ring-2 
-      focus:ring-cyan-500 focus:ring-offset-2 active:scale-95 active:bg-gray-50  cursor-pointer hover:opacity-100 group active:shadow-2xl active:z-1"
+          className="page_card_container transition-all relative block group/card  p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:scale-[1.02] focus:ring-2
+      focus:ring-cyan-500 focus:ring-offset-2 active:scale-95 active:bg-gray-50  cursor-pointer hover:opacity-100 group active:shadow-2xl"
         >
             <div className="flex w-full overflow-hidden items-center space-x-3">
               <Avatar src={favIconUrl} />

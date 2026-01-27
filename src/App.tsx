@@ -11,8 +11,7 @@ import Tooltip from "./components/Tooltip";
 import { z } from "zod";
 import { CardIdentify, useAppState } from "./store";
 import Empty from "./components/Empty";
-import { DndContext, MouseSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { siCollisionDetectionAlgorithm } from "./components/DragAndDrop/SiCollisionDetectionAlgorithm";
+import { DndContext, MouseSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 export const CardSchema = z.object({
@@ -86,9 +85,8 @@ export default function App() {
   }, [documentVisible]);
 
   const mouseSensor = useSensor(MouseSensor, {
-    // Require the mouse to move by 10 pixels before activating
     activationConstraint: {
-      distance: 10,
+      distance: 5,
     },
   });
 
@@ -97,7 +95,7 @@ export default function App() {
   return (
     <DndContext
     modifiers={[restrictToWindowEdges]}
-      collisionDetection={siCollisionDetectionAlgorithm}
+      collisionDetection={closestCenter}
       sensors={sensors}
       onDragEnd={(e) => {
         if ((e.collisions ?? [])?.length < 1) {
@@ -139,6 +137,7 @@ export default function App() {
             href: data.href,
             description: data.title
           })
+          Message.show(`"${data.title}" added to collection`)
           return
         }
       }}

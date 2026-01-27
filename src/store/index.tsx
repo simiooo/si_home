@@ -5,6 +5,15 @@ import Message from "../components/Message";
 import { ZodError } from "zod";
 import cryptoRandomString from "crypto-random-string";
 import { ConfigStorage } from "../utils/storage";
+import { arrayMove } from "@dnd-kit/sortable";
+
+function updateCardOrders(groups: Groups[]) {
+  groups.forEach(group => {
+    group.cards?.forEach((card, index) => {
+      card.order = index;
+    });
+  });
+}
 export interface CardIdentify {
   card: string;
   group: string;
@@ -168,8 +177,7 @@ export const useAppState = create(
       });
     },
     cardOrder: (source: CardIdentify, target: CardIdentify) => {
-      // 拖拽卡片位置
-
+      // 拖拽卡片位置 - 支持插入而非交换
       const groups = get().groups;
       let sourceGroup: Groups | undefined;
       let targetGroup: Groups | undefined;
@@ -177,10 +185,10 @@ export const useAppState = create(
       let targetCard: PageTabCard | undefined;
       let sourceCardIndex: number | undefined;
       let targetCardIndex: number | undefined;
+      
       for (const group of groups) {
         if (group.id === source?.group) {
           sourceGroup = group;
-
           group.cards?.forEach((card, index) => {
             if (card?.id === source?.card) {
               sourceCardIndex = index;
@@ -200,38 +208,57 @@ export const useAppState = create(
           });
         }
       }
-      if (!sourceCard) {
+      
+      if (!sourceCard || typeof sourceCardIndex !== 'number') {
         return;
       }
       
-      if(target?.card === 'empty') {
-        
-        if(typeof sourceCardIndex === 'number') {
-          sourceGroup?.cards?.splice(sourceCardIndex, 1);
-          targetGroup?.cards?.push({
-            ...sourceCard,
+      // 如果目标位置是空的，移动到目标分组的末尾
+      if (target?.card === 'empty') {
+        if (sourceGroup && targetGroup) {
+          sourceGroup.cards = (sourceGroup.cards ?? []).filter(card => card.id !== sourceCard!.id);
+          targetGroup.cards = (targetGroup.cards ?? []).concat({
+            ...sourceCard!,
             groupId: target.group,
-            order: Number.MIN_SAFE_INTEGER
-          });
-          set({
-            groups: [...groups],
           });
         }
-        return
-      }
-      if (!targetCard) {
+        updateCardOrders(groups);
+        set({ groups: [...groups] });
         return;
       }
-      const tempOrder: number | undefined = sourceCard?.order;
-      sourceCard.order = targetCard?.order;
-      targetCard.order = tempOrder;
-      if (sourceGroup != targetGroup && sourceCardIndex && targetCardIndex) {
-        sourceGroup?.cards?.splice(sourceCardIndex, 1, targetCard);
-        targetGroup?.cards?.splice(targetCardIndex, 1, sourceCard);
+      
+      if (!targetCard || typeof targetCardIndex !== 'number') {
+        return;
       }
-      set({
-        groups: [...groups],
-      });
+      
+      // 同一分组内的排序
+      if (sourceGroup === targetGroup && sourceGroup?.cards) {
+        sourceGroup.cards = arrayMove(sourceGroup.cards, sourceCardIndex, targetCardIndex);
+      } 
+      // 跨分组移动
+      else if (sourceGroup && targetGroup) {
+        // 从源分组移除卡片
+        sourceGroup.cards = (sourceGroup.cards ?? []).filter(card => card.id !== sourceCard!.id);
+        
+        // 插入到目标分组的指定位置
+        const updatedCard = { ...sourceCard!, groupId: target.group };
+        const targetCards = targetGroup.cards ?? [];
+        
+        if (targetCardIndex < targetCards.length) {
+          // 插入到指定位置之前
+          targetGroup.cards = [
+            ...targetCards.slice(0, targetCardIndex),
+            updatedCard,
+            ...targetCards.slice(targetCardIndex),
+          ];
+        } else {
+          // 添加到末尾
+          targetGroup.cards = [...targetCards, updatedCard];
+        }
+      }
+      
+      updateCardOrders(groups);
+      set({ groups: [...groups] });
     },
   }))
 );
